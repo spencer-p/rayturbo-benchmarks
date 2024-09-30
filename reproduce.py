@@ -2,6 +2,8 @@ import time
 import ray
 from ray.data._internal.execution.util import memory_string
 
+DATASET_URI = "path/to/your/s3"
+
 def benchmark(ds_factory):
     start_time = time.time()
 
