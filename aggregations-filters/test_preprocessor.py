@@ -2,7 +2,7 @@
 
 import ray
 from ray.data.context import DataContext, ShuffleStrategy
-from ray.data.preprocessor import Chain, SimpleImputer, StandardScaler
+from ray.data.preprocessors import Chain, SimpleImputer, StandardScaler
 import argparse
 import time
 
