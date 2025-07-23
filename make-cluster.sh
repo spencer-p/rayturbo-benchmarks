@@ -8,10 +8,8 @@ gcloud container clusters create ray-bench-large \
   --addons=RayOperator \
   --enable-ray-cluster-logging \
   --enable-ray-cluster-monitoring \
-  --enable-autoprovisioning \
-  --max-cpu=400 \
-  --max-memory=1400 \
   --machine-type c3d-standard-90 \
-  --num-nodes 1
+  --disk-size 256 \
+  --num-nodes 5
 
 kubectl apply -f ray-cluster-bench-large.yaml

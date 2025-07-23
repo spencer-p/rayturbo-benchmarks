@@ -30,7 +30,7 @@ spec:
     maxReplicas: 5
     groupName: workergroup
     rayStartParams:
-      object-store-memory: '128G'
+      object-store-memory: '128000000000'  # 128 GB in bytes
     template:
       spec:
         containers:
