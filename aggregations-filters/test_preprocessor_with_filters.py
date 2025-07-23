@@ -14,7 +14,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main(args):
-    dataset_path = f"s3://ray-benchmark-data/tpch/parquet/sf{args.sf}/orders"
+    dataset_path = f"gs://rayturbo-k8s-demo/tpch/parquet/sf{args.sf}/orders"
     if args.enable_hash_shuffle:
         DataContext.get_current().shuffle_strategy = ShuffleStrategy.HASH_SHUFFLE
 

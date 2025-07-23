@@ -12,13 +12,13 @@ from ray.data.aggregate import Count, Mean, Sum
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="TPCH Q1")
-    parser.add_argument("--sf", choices=[100, 1000, 10000], type=int, default=100)
+    parser.add_argument("--sf", choices=[1, 10, 100, 1000, 10000], type=int, default=100)
     parser.add_argument("--enable_hash_shuffle", action="store_true")
     return parser.parse_args()
 
 
 def main(args):
-    path = f"s3://ray-benchmark-data/tpch/parquet/sf{args.sf}/lineitem"
+    path = f"gs://rayturbo-k8s-demo/tpch/parquet/sf{args.sf}/lineitem"
     if args.enable_hash_shuffle:
         DataContext.get_current().shuffle_strategy = ShuffleStrategy.HASH_SHUFFLE
 
