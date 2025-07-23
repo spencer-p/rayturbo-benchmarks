@@ -1,0 +1,43 @@
+# This cluster config is based on https://www.anyscale.com/blog/rayturbo-data-improvements.
+apiVersion: ray.io/v1
+kind: RayCluster
+metadata:
+  name: benchmark-cluster
+spec:
+  rayVersion: '2.46.0'
+  headGroupSpec:
+    rayStartParams:
+      num-cpus: "0"
+    template:
+      spec:
+        containers:
+        - name: ray-head
+          image: rayproject/ray:2.46.0
+          resources:
+            requests:
+              cpu: 16
+              memory: 64G
+          ports:
+          - containerPort: 6379
+            name: gcs-server
+          - containerPort: 8265 # Ray dashboard
+            name: dashboard
+          - containerPort: 10001
+            name: client
+  workerGroupSpecs:
+  - replicas: 5
+    minReplicas: 5
+    maxReplicas: 5
+    groupName: workergroup
+    rayStartParams:
+      object-store-memory: '128G'
+    template:
+      spec:
+        containers:
+        - name: ray-worker
+          image: rayproject/ray:2.46.0
+          resources:
+            requests:
+              cpu: 64
+              memory: 256G
+              ephemeral-storage: 128G
