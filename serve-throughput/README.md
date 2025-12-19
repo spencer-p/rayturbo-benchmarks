@@ -35,7 +35,8 @@ Keep a 1:2 ratio between replicas of the Ranker and Ingress Deployment
    ```
    gcloud container clusters create my-benchmark-cluster \
      --location us-central2-b \  # Important: Choose a location with L4 available: https://docs.cloud.google.com/compute/docs/regions-zones/gpu-regions-zones
-     --enable-ray-operator  # Optional, you may install kuberay with helm as well.
+     --gateway-api=standard \
+     --addons=HTTPLoadBalancing,RayOperator
 
    gcloud container node-pools create gpu-pool \
      --cluster my-benchmark-cluster \
@@ -61,3 +62,49 @@ Keep a 1:2 ratio between replicas of the Ranker and Ingress Deployment
 
 Fetch the status with `kubectl get rayservice`. When it is ready, route
 throughput testing traffic through the service created (`kubectl get services`).
+
+### Using the Gateway API to route to the replicas
+
+Note in this branch the rayservice has the env var
+$ANYSCALE_RAY_SERVE_ENABLE_HA_PROXY set to 0 which enables direct ingress.
+Follow the same steps above to deploy the RayService (or deploy your own using a
+turbo image and the same env var set to 0).
+
+When creating the GKE cluster, you **must** enable the gateway api by adding the
+flags `--gateway-api=standard --addons=HTTPLoadBalancing`. You must also create
+a subnet:
+
+```
+gcloud compute networks subnets create \
+  my-proxy-only-subnet \
+  --purpose=REGIONAL_MANAGED_PROXY \
+  --role=ACTIVE \
+  --region=${REGION?} \
+  --network=default \
+  --project=${PROJECT?} \
+  --range=192.168.10.0/24
+```
+
+Wait for the service to come up. Now, run the poc gateway controller:
+```
+cd gateway-controller-poc
+go run . -filter throughput
+```
+Use your own rayservice name filter if needed.
+
+After some time, you should see your gateway has been provisioned:
+```
+NAME                                    CLASS         ADDRESS       PROGRAMMED   AGE
+throughput-benchmark-raycluster-b4c56   gke-l7-rilb   10.132.0.98   True         27h
+```
+
+You can verify traffic by hitting the described address.
+
+The controller only creates objects. You can delete objects like so:
+```
+kubectl delete gateways -lkubernetes.io/created-by=rayserve-gateway \
+    && kubectl delete httproutes.gateway.networking.k8s.io  -lkubernetes.io/created-by=rayserve-gateway \
+    && kubectl delete services -lkubernetes.io/created-by=rayserve-gateway \
+    && kubectl delete endpointslices -lkubernetes.io/created-by=rayserve-gateway \
+    && kubectl delete healthcheckpolicy -lkubernetes.io/created-by=rayserve-gateway
+```
