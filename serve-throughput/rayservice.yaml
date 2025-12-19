@@ -33,6 +33,8 @@ spec:
           - name: ray-head
             image: $RAY_IMAGE
             env:
+            - name: ANYSCALE_RAY_SERVE_ENABLE_HA_PROXY
+              value: "0"
             - name: RAY_GRAFANA_IFRAME_HOST
               value: http://127.0.0.1:3016
             - name: RAY_GRAFANA_HOST
@@ -73,6 +75,9 @@ spec:
           containers:
           - name: ray-worker
             image: $RAY_IMAGE
+            env:
+            - name: ANYSCALE_RAY_SERVE_ENABLE_HA_PROXY
+              value: "0"
             resources:
               limits:
                 nvidia.com/gpu: "4"
